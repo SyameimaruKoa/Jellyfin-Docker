@@ -22,7 +22,7 @@ services:
         target: /mnt/CD-flac
         read_only: true
     devices:
-      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri:/dev/dri
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
