@@ -30,3 +30,12 @@ services:
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    container_name: jellyfin-tunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=ey~~~~~
+	  
