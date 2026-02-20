@@ -36,6 +36,9 @@ services:
     restart: always
     container_name: jellyfin-tunnel
     command: tunnel run
+    extra_hosts:
+      - 'jellyfin:host-gateway'
+      - 'host.docker.internal:host-gateway'
     environment:
       - TUNNEL_TOKEN=ey~~~~~
 	  
