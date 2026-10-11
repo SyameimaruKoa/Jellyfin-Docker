@@ -5,7 +5,9 @@ services:
     user: 1000:1000
     group_add:
       - "XXX" # Change this to match your "render" host group id and remove this comment
-    network_mode: 'host'
+    # network_mode: 'host'
+    ports:
+      - "8096:8096"
     volumes:
       - ./config:/config
       - ./cache:/cache
