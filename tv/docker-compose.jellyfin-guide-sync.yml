@@ -1,0 +1,32 @@
+# Standalone consumer bridge: no tuner access and no published ports.
+services:
+  jellyfin-guide-sync:
+    image: ${CECH_SYNC_IMAGE:-python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170}
+    init: true
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: "no" # three failures stop for inspection instead of looping
+    entrypoint: [python3, /app/cech_jellyfin_guide_sync.py]
+    command:
+      - --base-url
+      - ${CECH_SYNC_JELLYFIN_URL:-http://jellyfin:8096}
+      - --provider-url
+      - ${CECH_SYNC_PROVIDER_URL:-http://cech-tv-guide:40774/guide.xml}
+      - --guide
+      - /guide/current/guide.xml
+      - --credentials
+      - /run/secrets/jellyfin-guide.json
+      - --state
+      - /state/sync.json
+    volumes:
+      - ./tv/tools/cech_jellyfin_guide_sync.py:/app/cech_jellyfin_guide_sync.py:ro
+      - ${CECH_SYNC_GUIDE_DIR:?Set existing guide directory}:/guide:ro
+      - ${CECH_SYNC_STATE_DIR:?Set writable sync journal directory}:/state
+      - ${CECH_SYNC_CREDENTIALS:?Set private JSON credentials file}:/run/secrets/jellyfin-guide.json:ro
+    networks: [jellyfin]
+networks:
+  jellyfin:
+    name: ${CECH_JELLYFIN_NETWORK:?Set existing Jellyfin network}
+    external: true

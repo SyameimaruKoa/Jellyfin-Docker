@@ -1,2 +1,7 @@
 cache/
 config/
+.env
+tv/private/
+tv/runtime/
+__pycache__/
+*.pyc

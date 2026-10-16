@@ -1,0 +1,6 @@
+# Apply with the existing root Compose; only changes the image/build.
+services:
+    jellyfin:
+        image: cech-jellyfin-live-buffer:local
+        build:
+            context: ./tv/docker/jellyfin-live

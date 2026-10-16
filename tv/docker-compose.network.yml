@@ -1,0 +1,9 @@
+services:
+    jellyfin:
+        networks:
+            default: {}
+            tv-media: {}
+networks:
+    tv-media:
+        external: true
+        name: ${CECH_MEDIA_NETWORK:-cech-media}
