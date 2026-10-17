@@ -1,6 +1,7 @@
 # Standalone optional HTTPS gateway. NOT an override of the HTTP Jellyfin service.
 # Based on the existing tv/docker-compose.https.yml, without altering that legacy integration.
 # CECH_JELLYFIN_NETWORK must be an existing Docker network reachable by BOTH upstreams.
+# Keep the original external bindings: KonomiTV HTTPS 7443, Jellyfin HTTPS 8443.
 services:
     tv-https:
         image: "${CECH_TLS_IMAGE:-nginx@sha256:ed84151ed2d47ef93c0939eb9b9754c6990db6092cd2081e11988a47a83d47ea}"
@@ -22,10 +23,10 @@ services:
             - ./tv/docker/tv-https:/app:ro
             - "${CECH_TLS_CERT_DIR:-/etc/tailscale-certs}:/tls:ro"
         ports:
-            - "${CECH_TLS_BIND:?Set Tailscale IPv4 in .env}:${CECH_TLS_KONOMI_HOST_PORT:-7443}:7443"
-            - "${CECH_TLS_BIND}:${CECH_TLS_JELLYFIN_HOST_PORT:-8443}:8443"
-            - "${CECH_TLS_LOCAL_BIND:-127.0.0.1}:${CECH_TLS_KONOMI_HOST_PORT:-7443}:7443"
-            - "${CECH_TLS_LOCAL_BIND:-127.0.0.1}:${CECH_TLS_JELLYFIN_HOST_PORT:-8443}:8443"
+            - "${CECH_TLS_BIND:?Set Tailscale IPv4 in .env}:7443:7443"
+            - "${CECH_TLS_BIND}:8443:8443"
+            - "127.0.0.1:7443:7443"
+            - "127.0.0.1:8443:8443"
         networks:
             - shared
 networks:

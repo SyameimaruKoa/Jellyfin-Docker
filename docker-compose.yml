@@ -8,7 +8,7 @@ services:
             - "${JELLYFIN_RENDER_GID:?Set JELLYFIN_RENDER_GID in .env}"
         # network_mode: 'host'
         ports:
-            - "${JELLYFIN_HTTP_PORT:-8096}:8096"
+            - "8096:8096"
         volumes:
             - ./config:/config
             - ./cache:/cache
