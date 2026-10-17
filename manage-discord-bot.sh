@@ -78,7 +78,7 @@ case "$1" in
             printf '先にJellyfin本体を起動してください。\n' >&2
             exit 1
         fi
-        # 依存先Jellyfinを再作成せず、既存のTV版・HTTPS設定を保持する。
+        # 依存先Jellyfinを再作成せず、既存のTV版を保持する。
         compose up -d --no-deps jellyfin-discord-bot
         ;;
     disable|off)

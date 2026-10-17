@@ -21,7 +21,7 @@ Jellyfin テレビ向けWeb修正の管理
     TV版では監査済み固定バージョンのJellyfin Webを使用する。
     enable/disableはJellyfinコンテナを再作成するため再生が中断する。
     必ず事前にconfig/をバックアップし、互換性を確認すること。
-    HTTPSゲートウェイと番組表同期は別の機能として管理する。
+    番組表同期は別の機能として管理する。
 HELP
 }
 
@@ -54,25 +54,12 @@ fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
-https_port_active() {
-    # 現在公開している8920の設定は、TV版との切り替え後も維持する。
-    docker port jellyfin 8920/tcp >/dev/null 2>&1
-}
-
 compose_base() {
-    local files=(-f "$SCRIPT_DIR/docker-compose.yml")
-    if https_port_active; then
-        files+=(-f "$SCRIPT_DIR/docker-compose.https.yml")
-    fi
-    docker compose --project-directory "$SCRIPT_DIR" "${files[@]}" "$@"
+    docker compose --project-directory "$SCRIPT_DIR" -f "$SCRIPT_DIR/docker-compose.yml" "$@"
 }
 
 compose_tv() {
-    local files=(-f "$SCRIPT_DIR/docker-compose.yml" -f "$SCRIPT_DIR/docker-compose.tv.yml")
-    if https_port_active; then
-        files+=(-f "$SCRIPT_DIR/docker-compose.https.yml")
-    fi
-    docker compose --project-directory "$SCRIPT_DIR" "${files[@]}" "$@"
+    docker compose --project-directory "$SCRIPT_DIR" -f "$SCRIPT_DIR/docker-compose.yml" -f "$SCRIPT_DIR/docker-compose.tv.yml" "$@"
 }
 
 case "$1" in

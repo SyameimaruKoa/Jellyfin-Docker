@@ -1,5 +1,4 @@
 {
-    "HTTPS.md": "2cece7c2769ac43d82206b6ed949c9e9337c141a9bd62b9077cb5103830ab690",
     "JELLYFIN_GUIDE_SYNC.md": "32197717dcb4a19259c0fd0867a2c090e363b6680b9920db9e257bd99fb4e4fd",
     "README.md": "8aa1dd429421ba867cdcc4575dec37d9aeed832374ce5f1e2995567eb701e570",
     "SPLIT_SOURCE.json": "917b475aa8e27070879456c62757a991198c5acf937e177c33dc8d684a8cdeac",
@@ -9,9 +8,6 @@
     "docker/jellyfin-live/build_assets.py": "58e566f058f383201a4513f73fbfd28d5c2fccf471ff07642596f5f88a1f065c",
     "docker/jellyfin-live/patch_candidate.py": "e4d423ccdc67f611133f665c414251f02bd5f63a3653affb109bbcf385a5435b",
     "docker/jellyfin-live/patch_native_menu.py": "62d794d62c315bd070ca53a755066aaaf950997bc9517b2fa66270f6a0045640",
-    "docker/tv-https/nginx.conf.template": "d739fe553f6a7189352c1187a2e85789e46acf056a49976de9f3bb19be038d3e",
-    "docker/tv-https/start.sh": "c70ebda0d60369fc90d1bd3643701931d2a4cb3484e63367e8922ebd15de7a44",
-    "docker-compose.https.yml": "2326bcf4b18f20e86af892e067e168359acea93bd36840b5be14e98aa2d801c2",
     "docker-compose.jellyfin-guide-sync.yml": "0d5a74d07b110b186a9553bc02d6fb8c288357ec566199142f04e0935b3d51f7",
     "docker-compose.jellyfin-live-buffer.yml": "432f04fd20149c0575417d9ccae873f7b62f9ad1f388b3afe72770e49d4ecd3a",
     "docker-compose.network.yml": "8b8e5a65591298c53c81c37f96df32706945c1285f7828034b816ed7bc3eeef4",
