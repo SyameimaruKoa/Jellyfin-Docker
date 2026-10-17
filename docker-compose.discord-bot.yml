@@ -1,0 +1,15 @@
+# Discord音楽ボット（任意）。Jellyfin本体とは別ファイルで管理する。
+services:
+    jellyfin-discord-bot:
+        image: ghcr.io/manuel-rw/jellyfin-discord-music-bot:latest
+        container_name: jellyfin-discord-bot
+        restart: unless-stopped
+        depends_on:
+            - jellyfin
+        environment:
+            DISCORD_CLIENT_TOKEN: "${DISCORD_CLIENT_TOKEN:-}"
+            JELLYFIN_SERVER_ADDRESS: "http://jellyfin:8096"
+            JELLYFIN_AUTHENTICATION_USERNAME: "${JELLYFIN_BOT_USERNAME:-}"
+            JELLYFIN_AUTHENTICATION_PASSWORD: "${JELLYFIN_BOT_PASSWORD:-}"
+            ALLOW_EVERYONE_FOR_DEFAULT_PERMS: "false"
+            UPDATER_DISABLE_NOTIFICATIONS: "true"

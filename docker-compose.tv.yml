@@ -1,0 +1,15 @@
+# テレビ向け追加設定。docker-compose.ymlに重ねて使用する。
+# 共有ネットワークcech-mediaは別途作成・接続しておく。
+# Web修正版は検証済みの固定バージョンを使用する。適用前にconfig/をバックアップすること。
+services:
+    jellyfin:
+        image: cech-jellyfin-live-buffer:local
+        build:
+            context: ./tv/docker/jellyfin-live
+        networks:
+            default: {}
+            tv-media: {}
+networks:
+    tv-media:
+        external: true
+        name: cech-media
