@@ -15,7 +15,7 @@ CECH_TLS_BIND=ホストのTailscale IPv4
 CECH_JELLYFIN_NETWORK=既存アプリ共通のDockerネットワーク名
 ```
 
-rootの `.env` 方式でも元の公開ポート（KonomiTV 7443 / Jellyfin 8443）は既定値のままです。`CECH_TLS_KONOMI_HOST_PORT` / `CECH_TLS_JELLYFIN_HOST_PORT` は必要な場合だけホスト側のバインド先を変更する設定です。`tv/docker-compose.https.yml` の従来構成は一切変更していません。KonomiTV自体は別のリポジトリで管理されるサービスです。`CECH_JELLYFIN_NETWORK` は両HTTPアップストリームへ到達できる共通ネットワークを指定してください。
+rootの `.env` 方式でも元の公開ポート（KonomiTV 7443 / Jellyfin 8443）は固定値として維持します。内部の転送先は `konomitv:7000` と `jellyfin:8096`、証明書の配置は `/etc/tailscale-certs` です。`.env` にはPC固有の証明書ホスト名・証明書グループID・Tailscale IPv4・共有Dockerネットワークだけを指定します。`tv/docker-compose.https.yml` の従来構成は変更していません。KonomiTV自体は別リポジトリのサービスです。`CECH_JELLYFIN_NETWORK` は両HTTP転送先へ到達できる既存ネットワークを指定してください。
 
 必要に応じ `CECH_TLS_CERT_DIR` とdigestで固定した `CECH_TLS_IMAGE` を指定できます。起動: `docker compose --project-directory . -p tv-https --env-file tv/private/https.env -f tv/docker-compose.https.yml up -d`。停止:同じComposeで `stop`。既存アプリや証明書サービスの設定変更は不要です。
 

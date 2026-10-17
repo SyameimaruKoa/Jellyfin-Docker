@@ -1,9 +1,9 @@
-# Optional TV integration. Combine with docker-compose.yml explicitly.
-# Requires the pre-existing external TV media network.
-# The patched Jellyfin image is pinned to tested upstream Web assets; back up config first.
+# テレビ向け追加設定。docker-compose.ymlに重ねて使用する。
+# 共有ネットワークcech-mediaは別途作成・接続しておく。
+# Web修正版は検証済みの固定バージョンを使用する。適用前にconfig/をバックアップすること。
 services:
     jellyfin:
-        image: "${CECH_JELLYFIN_PATCHED_IMAGE:-cech-jellyfin-live-buffer:local}"
+        image: cech-jellyfin-live-buffer:local
         build:
             context: ./tv/docker/jellyfin-live
         networks:
@@ -12,4 +12,4 @@ services:
 networks:
     tv-media:
         external: true
-        name: "${CECH_MEDIA_NETWORK:-cech-media}"
+        name: cech-media

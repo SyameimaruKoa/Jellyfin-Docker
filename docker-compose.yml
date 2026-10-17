@@ -3,33 +3,34 @@ services:
         image: jellyfin/jellyfin:preview
         container_name: jellyfin
         hostname: "${HOST_HOSTNAME:-jellyfin}"
-        user: "${JELLYFIN_UID:-1000}:${JELLYFIN_GID:-1000}"
+        user: "1000:1000"
         group_add:
             - "${JELLYFIN_RENDER_GID:?Set JELLYFIN_RENDER_GID in .env}"
+        # 通常はポート公開で動作する
         # network_mode: 'host'
         ports:
-            - "${JELLYFIN_HTTP_PORT:-8096}:8096"
+            - "8096:8096"
         volumes:
             - ./config:/config
             - ./cache:/cache
             - type: bind
-              source: "${JELLYFIN_VIDEOS_DIR:-/mnt/NAS/Documents/Videos}"
+              source: /mnt/NAS/Documents/Videos
               target: /mnt/Videos
               read_only: true
             - type: bind
-              source: "${JELLYFIN_MUSIC_DIR:-/mnt/NAS/Documents/Music}"
+              source: /mnt/NAS/Documents/Music
               target: /mnt/Musics
               read_only: true
             - type: bind
-              source: "${JELLYFIN_CD_FLAC_DIR:-/mnt/NAS/Documents/CDリッピング(flac)/}"
+              source: "/mnt/NAS/Documents/CDリッピング(flac)/"
               target: /mnt/CD-flac
               read_only: true
         devices:
             - /dev/dri:/dev/dri
         restart: 'unless-stopped'
-        # Optional - alternative address used for autodiscovery
+        # 自動検出時に通知する公開アドレス
         environment:
             - JELLYFIN_PublishedServerUrl=${JELLYFIN_PUBLISHED_SERVER_URL:-}
-        # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+        # ホストへの接続時に用いる名前解決
         extra_hosts:
             - 'host.docker.internal:host-gateway'

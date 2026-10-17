@@ -19,7 +19,7 @@ Web修正は監査済み固定Jellyfinイメージ用です。別versionへ自�
 必須環境変数とprivate認証ファイルを設定して使います。
 単独起動はrootで`docker compose --project-directory . -f tv/docker-compose.jellyfin-guide-sync.yml up -d`です。認証をGitへ追加しません。
 
-HTTPS gatewayは既存Tailscale証明書をro mountし、KonomiTVにも接続する共有入口です。rootの `docker-compose.https.yml` と `manage-https.sh` を使えば、`.env` で必須接続情報を指定し、HTTP本体やTV Web修正と切り離して起動・停止できるぞ。
+HTTPSゲートウェイは既存Tailscale証明書を読み取り専用でマウントし、別リポジトリのKonomiTVにも接続する共有入口です。ルートの `docker-compose.https.yml` では従来のポート・転送先を固定し、PC依存の情報と認証関連の値だけを `.env` で設定します。HTTP本体やテレビ向けWeb修正とは別に起動・停止できます。
 rootで`docker compose --project-directory . -p tv-https -f tv/docker-compose.https.yml`を指定し、既存gatewayと同じポートを
 同時に公開しないでください。現在の稼働gatewayは移行していません。
 USB復旧待ちで、これらの分離ファイルへの実環境移行・実再生は未確認です。

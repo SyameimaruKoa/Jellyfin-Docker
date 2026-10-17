@@ -21,15 +21,15 @@ Tailscale HTTPS連携の管理（Jellyfin HTTP本体とは独立したComposeプ
 設定:
     .env.example を既存の .env を上書きせずにコピーして設定する。
     必須: CECH_TLS_CERT_GID, CECH_TLS_SERVER_NAME,
-          CECH_TLS_KONOMI_UPSTREAM, CECH_TLS_BIND,
-          CECH_JELLYFIN_NETWORK
+          CECH_TLS_BIND, CECH_JELLYFIN_NETWORK
     TLS証明書はTailscale-certificatesが管理する既存のものを使い、
-    /etc/tailscale-certs（設定変更可）を読み取り専用でマウントする。
+    /etc/tailscale-certsを読み取り専用でマウントする。
     CECH_JELLYFIN_NETWORK はJellyfinとKonomiTVの両方へ
     接続できる既存のDockerネットワークを指定すること。
 
 注意:
-    デフォルトではTailscale IPと127.0.0.1で7443/8443を公開する。
+    従来どおりTailscale IPと127.0.0.1で7443/8443を公開する。
+    KonomiTVの転送先はkonomitv:7000のまま変更しない。
     既存gatewayとポート競合する場合は先に切り替えを計画すること。
     本スクリプトはJellyfinのHTTPサービスを変更しない。
 HELP

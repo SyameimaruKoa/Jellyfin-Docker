@@ -1,36 +1,36 @@
-# Standalone optional HTTPS gateway. NOT an override of the HTTP Jellyfin service.
-# Based on the existing tv/docker-compose.https.yml, without altering that legacy integration.
-# CECH_JELLYFIN_NETWORK must be an existing Docker network reachable by BOTH upstreams.
-# Preserve original bindings by default: KonomiTV HTTPS 7443, Jellyfin HTTPS 8443.
-# Host-side ports may be configured explicitly, without changing service ports or upstreams.
+# HTTPSゲートウェイ（任意）。Jellyfin HTTP本体とは別のコンテナで動作する。
+# tv/に元からある同等の中継機能を維持する。従来ファイルは変更しない。
+# KonomiTVとJellyfinの両方に到達できる既存ネットワークを指定すること。
+# 従来のポート：KonomiTV 7443、Jellyfin 8443。
+# ポート・内部接続先・イメージ・証明書の配置は固定値。
 services:
     tv-https:
-        image: "${CECH_TLS_IMAGE:-nginx@sha256:ed84151ed2d47ef93c0939eb9b9754c6990db6092cd2081e11988a47a83d47ea}"
+        image: nginx@sha256:ed84151ed2d47ef93c0939eb9b9754c6990db6092cd2081e11988a47a83d47ea
         init: true
-        user: "${CECH_TLS_USER:-1000:1000}"
+        user: "1000:1000"
         group_add:
-            - "${CECH_TLS_CERT_GID:?Set CECH_TLS_CERT_GID in .env}"
+            - "${CECH_TLS_CERT_GID:?証明書のグループIDを.envに設定}"
         read_only: true
         cap_drop: [ALL]
         security_opt: [no-new-privileges:true]
         restart: unless-stopped
         entrypoint: [/bin/sh, /app/start.sh]
         environment:
-            CECH_TLS_SERVER_NAME: "${CECH_TLS_SERVER_NAME:?Set certificate FQDN in .env}"
-            CECH_TLS_KONOMI_UPSTREAM: "${CECH_TLS_KONOMI_UPSTREAM:?Set KonomiTV address in .env}"
-            CECH_TLS_JELLYFIN_UPSTREAM: "${CECH_TLS_JELLYFIN_UPSTREAM:-jellyfin:8096}"
+            CECH_TLS_SERVER_NAME: "${CECH_TLS_SERVER_NAME:?証明書のFQDNを.envに設定}"
+            CECH_TLS_KONOMI_UPSTREAM: "konomitv:7000"
+            CECH_TLS_JELLYFIN_UPSTREAM: "jellyfin:8096"
         tmpfs: ["/tmp:rw,nosuid,nodev,size=64m,mode=1777"]
         volumes:
             - ./tv/docker/tv-https:/app:ro
-            - "${CECH_TLS_CERT_DIR:-/etc/tailscale-certs}:/tls:ro"
+            - "/etc/tailscale-certs:/tls:ro"
         ports:
-            - "${CECH_TLS_BIND:?Set Tailscale IPv4 in .env}:${CECH_TLS_KONOMI_HOST_PORT:-7443}:7443"
-            - "${CECH_TLS_BIND}:${CECH_TLS_JELLYFIN_HOST_PORT:-8443}:8443"
-            - "${CECH_TLS_LOCAL_BIND:-127.0.0.1}:${CECH_TLS_KONOMI_HOST_PORT:-7443}:7443"
-            - "${CECH_TLS_LOCAL_BIND:-127.0.0.1}:${CECH_TLS_JELLYFIN_HOST_PORT:-8443}:8443"
+            - "${CECH_TLS_BIND:?Tailscale IPv4を.envに設定}:7443:7443"
+            - "${CECH_TLS_BIND}:8443:8443"
+            - "127.0.0.1:7443:7443"
+            - "127.0.0.1:8443:8443"
         networks:
             - shared
 networks:
     shared:
         external: true
-        name: "${CECH_JELLYFIN_NETWORK:?Set common Docker network in .env}"
+        name: "${CECH_JELLYFIN_NETWORK:?共通Dockerネットワーク名を.envに設定}"

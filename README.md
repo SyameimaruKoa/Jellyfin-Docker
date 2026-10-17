@@ -4,7 +4,7 @@
 
 ## 初期設定
 
-`.env` にホスト固有の設定を置く。Composeファイル内のパスや認証情報を直接書き換える必要はないぞ。
+PC固有の情報と認証情報だけを `.env` に記述する。ポート・ファイルパス・イメージ・内部接続先など個人運用で固定している値はComposeに直接記述する。
 
 ```bash
 cp -n .env.example .env
@@ -18,11 +18,7 @@ getent group render
 | 項目 | 説明 |
 | --- | --- |
 | `HOST_HOSTNAME` | Jellyfinコンテナのホスト名 |
-| `JELLYFIN_UID` / `JELLYFIN_GID` | Jellyfin実行ユーザー・グループID（既定1000） |
 | `JELLYFIN_RENDER_GID` | **必須**。ホスト側 `render` グループID |
-| `JELLYFIN_VIDEOS_DIR` | 動画フォルダのホスト側パス |
-| `JELLYFIN_MUSIC_DIR` | 音楽フォルダのホスト側パス |
-| `JELLYFIN_CD_FLAC_DIR` | CDリッピングのホスト側パス |
 | `JELLYFIN_PUBLISHED_SERVER_URL` | オプション。クライアントに通知する公開URL |
 
 `JELLYFIN_RENDER_GID` は次のコマンドで数値を調べられる。
@@ -39,7 +35,7 @@ getent group render | cut -d: -f3
 chmod 600 .env
 ```
 
-通常のJellyfin HTTPは従来どおり **8096:8096** が既定値じゃ。`JELLYFIN_HTTP_PORT` でホスト側のポートを指定できるが、Cloudflare Tunnel等の接続設定に影響するため、既存環境では変更しないこと。
+Jellyfin HTTPは従来どおり **8096:8096** のまま。Cloudflare Tunnelなどの接続先を維持するため、ポート番号はComposeに直接記述している。動画・音楽・CDリッピングの既存パスも変更しない。
 
 起動するには以下を実行する。
 
@@ -60,10 +56,6 @@ docker compose up -d
 | `DISCORD_CLIENT_TOKEN` | Discord Bot Token |
 | `JELLYFIN_BOT_USERNAME` | ボット専用Jellyfinユーザー名 |
 | `JELLYFIN_BOT_PASSWORD` | ボット専用Jellyfinパスワード |
-| `JELLYFIN_BOT_SERVER_ADDRESS` | 通常は `http://jellyfin:8096` のままでよい |
-| `JELLYFIN_BOT_IMAGE` | ボットのDockerイメージ（任意） |
-| `JELLYFIN_BOT_ALLOW_EVERYONE` | Discordコマンドの既定権限（任意） |
-| `JELLYFIN_BOT_DISABLE_UPDATE_NOTIFICATIONS` | 更新通知の無効化（任意） |
 
 同じComposeプロジェクトの内部ネットワークからJellyfinへ接続するため、ボット側に音楽ファイルの追加マウントや公開ポートは不要じゃ。パスワードに `$` などを使う場合は `.env` の値を**単一引用符**で囲み、Composeの意図しない変数展開を避けること。
 
@@ -114,7 +106,7 @@ docker compose -f docker-compose.yml -f docker-compose.discord-bot.yml stop jell
 | `docker-compose.https.yml` | Tailscale証明書を使う独立HTTPS gateway（KonomiTV / Jellyfin） |
 | `tv/docker-compose.jellyfin-guide-sync.yml` | 番組表同期（従来通り独立管理） |
 
-TV版はWebアセットを監査済みバージョンに固定している。最新Jellyfinと差がある場合もあるため、`config/` をバックアップし、互換性を確認してから適用すること。TV用外部ネットワークの名称は `.env` の `CECH_MEDIA_NETWORK` で設定する。
+TV版はWebアセットを監査済みバージョンに固定している。最新Jellyfinと差がある場合もあるため、`config/` をバックアップし、互換性を確認してから適用すること。TV用外部ネットワーク名は従来の `cech-media` を直接指定する。
 
 ```bash
 ./manage-tv.sh enable
@@ -131,7 +123,7 @@ TV版はWebアセットを監査済みバージョンに固定している。最
 
 この機能は**別ComposeプロジェクトのNginx gateway**で、JellyfinのネイティブHTTPS設定ではない。もともと `tv/` にあるテレビ連携用のNginx gatewayと同じKonomiTV・Jellyfinへの中継機能を持つ。KonomiTVの本体やチューナーはこのリポジトリで管理しない。Tailscale証明書は読み取り専用で利用する。
 
-`.env` で設定する必須値は `CECH_TLS_CERT_GID`、`CECH_TLS_SERVER_NAME`、`CECH_TLS_BIND`、`CECH_TLS_KONOMI_UPSTREAM`、`CECH_JELLYFIN_NETWORK`。特に `CECH_JELLYFIN_NETWORK` は両バックエンドにアクセス可能な既存Dockerネットワークを指定する。Jellyfin/KonomiTVの接続先と証明書ディレクトリは `.env` から指定する。HTTPSゲートウェイのホスト側ポートは **7443/8443 が既定値**で、`CECH_TLS_KONOMI_HOST_PORT` / `CECH_TLS_JELLYFIN_HOST_PORT` で必要な場合のみ指定変更できる。コンテナ内部のポートは変更しない。**元の `tv/docker-compose.https.yml` は変更しない**ので、そちらを使用中なら重複起動しないこと。
+`.env` で設定する必須値は `CECH_TLS_CERT_GID`、`CECH_TLS_SERVER_NAME`、`CECH_TLS_BIND`、`CECH_JELLYFIN_NETWORK`。特に `CECH_JELLYFIN_NETWORK` は両バックエンドにアクセス可能な既存Dockerネットワークを指定する。HTTPSゲートウェイのポートは **7443/8443**、転送先は `konomitv:7000` / `jellyfin:8096`、証明書の配置は `/etc/tailscale-certs` としてCompose内に直接記述する。これらを変更するための `.env` 項目は設けない。**元の `tv/docker-compose.https.yml` は変更しない**ので、そちらを使用中なら重複起動しないこと。
 
 ```bash
 ./manage-https.sh check
