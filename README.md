@@ -39,7 +39,7 @@ getent group render | cut -d: -f3
 chmod 600 .env
 ```
 
-従来のCloudflare Tunnel等との接続を維持するため、Jellyfin本体のホストポートは **8096:8096 固定**じゃ。環境変数によるポート番号変更は用意しない。
+通常のJellyfin HTTPは従来どおり **8096:8096** が既定値じゃ。`JELLYFIN_HTTP_PORT` でホスト側のポートを指定できるが、Cloudflare Tunnel等の接続設定に影響するため、既存環境では変更しないこと。
 
 起動するには以下を実行する。
 
@@ -129,9 +129,9 @@ TV版はWebアセットを監査済みバージョンに固定している。最
 
 ## HTTPS連携（任意・HTTPとは独立）
 
-この機能はJellyfin本体への上書きではない。**別ComposeプロジェクトのNginx gateway**として、既存のTailscale証明書を読み取り専用で使い、KonomiTV用7443とJellyfin用8443を公開する。
+この機能は**別ComposeプロジェクトのNginx gateway**で、JellyfinのネイティブHTTPS設定ではない。もともと `tv/` にあるテレビ連携用のNginx gatewayと同じKonomiTV・Jellyfinへの中継機能を持つ。KonomiTVの本体やチューナーはこのリポジトリで管理しない。Tailscale証明書は読み取り専用で利用する。
 
-`.env` で設定する必須値は `CECH_TLS_CERT_GID`、`CECH_TLS_SERVER_NAME`、`CECH_TLS_BIND`、`CECH_TLS_KONOMI_UPSTREAM`、`CECH_JELLYFIN_NETWORK`。特に `CECH_JELLYFIN_NETWORK` は両バックエンドにアクセス可能な既存Dockerネットワークを指定する。Jellyfin/KonomiTVの接続先と証明書ディレクトリは `.env` から指定する。ただし、従来の連携先を維持するため、HTTPSのホスト側ポートは **7443/8443 固定**、ループバックのバインドも従来どおり `127.0.0.1` のままじゃ。
+`.env` で設定する必須値は `CECH_TLS_CERT_GID`、`CECH_TLS_SERVER_NAME`、`CECH_TLS_BIND`、`CECH_TLS_KONOMI_UPSTREAM`、`CECH_JELLYFIN_NETWORK`。特に `CECH_JELLYFIN_NETWORK` は両バックエンドにアクセス可能な既存Dockerネットワークを指定する。Jellyfin/KonomiTVの接続先と証明書ディレクトリは `.env` から指定する。HTTPSゲートウェイのホスト側ポートは **7443/8443 が既定値**で、`CECH_TLS_KONOMI_HOST_PORT` / `CECH_TLS_JELLYFIN_HOST_PORT` で必要な場合のみ指定変更できる。コンテナ内部のポートは変更しない。**元の `tv/docker-compose.https.yml` は変更しない**ので、そちらを使用中なら重複起動しないこと。
 
 ```bash
 ./manage-https.sh check
