@@ -24,6 +24,7 @@ Jellyfin Discord音楽ボットの起動・停止・状態確認
     3. ./manage-discord-bot.sh enable を実行する
 
 通常の docker compose up -d ではボットは新規起動されない。
+ボット専用Composeファイルを指定したときだけ管理する。
 enable後は restart: unless-stopped により再起動時も稼働し、
 disable後は明示的にenableするまで停止状態を保つ。
 HELP
@@ -62,7 +63,7 @@ compose() {
     docker compose \
         --project-directory "$SCRIPT_DIR" \
         -f "$SCRIPT_DIR/docker-compose.yml" \
-        --profile discord-bot \
+        -f "$SCRIPT_DIR/docker-compose.discord-bot.yml" \
         "$@"
 }
 

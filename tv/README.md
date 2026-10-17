@@ -2,7 +2,9 @@
 
 USB・mirakc・EPG収集は別リポジトリmirakc-Dockerで管理します。
 このディレクトリにはJellyfin側のWeb修正、番組表同期、HTTPS gatewayを置きます。
-元のdocker-compose.ymlと既存ライブラリ設定は変更していません。
+元のdocker-compose.ymlはHTTP版Jellyfinのみを定義します。既存ライブラリ設定は維持します。
+
+通常はrootの `./manage-tv.sh enable` / `disable` で、既存のTV Web修正とTV用ネットワークをまとめて切り替えるのじゃ。rootの `docker-compose.tv.yml` がこの二つを組み合わせる。従来の個別ファイルも互換用に残しておる。
 
 Composeの相対パスを統一するため、リポジトリrootで元のComposeを先に指定します。
 例: `docker compose -f docker-compose.yml -f tv/docker-compose.network.yml -f tv/docker-compose.jellyfin-live-buffer.yml config --quiet`
@@ -17,7 +19,7 @@ Web修正は監査済み固定Jellyfinイメージ用です。別versionへ自�
 必須環境変数とprivate認証ファイルを設定して使います。
 単独起動はrootで`docker compose --project-directory . -f tv/docker-compose.jellyfin-guide-sync.yml up -d`です。認証をGitへ追加しません。
 
-HTTPS gatewayは既存Tailscale証明書をro mountし、KonomiTVにも接続する共有入口です。
+HTTPS gatewayは既存Tailscale証明書をro mountし、KonomiTVにも接続する共有入口です。rootの `docker-compose.https.yml` と `manage-https.sh` を使えば、`.env` で必須接続情報を指定し、HTTP本体やTV Web修正と切り離して起動・停止できるぞ。
 rootで`docker compose --project-directory . -p tv-https -f tv/docker-compose.https.yml`を指定し、既存gatewayと同じポートを
 同時に公開しないでください。現在の稼働gatewayは移行していません。
 USB復旧待ちで、これらの分離ファイルへの実環境移行・実再生は未確認です。

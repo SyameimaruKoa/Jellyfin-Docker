@@ -1,6 +1,6 @@
 # Jellyfin Docker
 
-[Jellyfin](https://jellyfin.org/) を Docker Compose で動かす構成じゃ。既存の動画・音楽マウントを維持しつつ、[Jellyfin Discord Music Bot](https://github.com/manuel-rw/jellyfin-discord-music-bot) を任意で起動できるようにしておる。
+[Jellyfin](https://jellyfin.org/) をDocker Composeで動かす構成じゃ。標準の `docker-compose.yml` はHTTP版のJellyfinのみ。Discord音楽ボット・TV向け修正・HTTPS gatewayはそれぞれ独立した追加ファイルで選択できるのじゃ。
 
 ## 初期設定
 
@@ -48,7 +48,7 @@ docker compose up -d
 
 ## Discord音楽ボット（任意）
 
-ボットは**初期状態では無効**じゃ。Composeの `discord-bot` プロファイルで独立管理しているため、通常の `docker compose up -d` で新しく起動されることはない。
+ボットは**初期状態では無効**じゃ。`docker-compose.discord-bot.yml` を明示したときだけ構成へ追加するので、通常の `docker compose up -d` では新しく起動されない。
 
 設定を始める前に、Discord Developer Portal でBot Tokenを取得し、Jellyfin側に音楽ライブラリへアクセスできる専用ユーザーを作る。
 
@@ -93,14 +93,57 @@ chmod +x manage-discord-bot.sh
 直接Docker Composeを使う場合は、次のコマンドでも同じ操作ができる。
 
 ```bash
-docker compose --profile discord-bot up -d jellyfin-discord-bot
-docker compose --profile discord-bot stop jellyfin-discord-bot
+docker compose -f docker-compose.yml -f docker-compose.discord-bot.yml up -d jellyfin-discord-bot
+docker compose -f docker-compose.yml -f docker-compose.discord-bot.yml stop jellyfin-discord-bot
 ```
 
 ### Discord側のコマンド
 
 ボットがDiscord VCへ参加できるように権限を与えること。主なコマンドは `/play`、`/random`、`/shuffle`、`/playlist`、`/status` じゃ。任意フォルダ内だけの再帰シャッフルではなく、Jellyfinのライブラリや再生キューを対象とするぞ。
 
+## TV向け機能（任意）
+
+**標準起動はHTTP版Jellyfinのみ**じゃ。TV向けの追加機能は手動で有効化する。
+
+| ファイル | 用途 |
+| --- | --- |
+| `docker-compose.yml` | HTTP版Jellyfin本体 |
+| `docker-compose.discord-bot.yml` | Discord音楽ボット（手動起動） |
+| `docker-compose.tv.yml` | TV向けの固定版Jellyfin Web修正とTV用ネットワーク |
+| `docker-compose.https.yml` | Tailscale証明書を使う独立HTTPS gateway（KonomiTV / Jellyfin） |
+| `tv/docker-compose.jellyfin-guide-sync.yml` | 番組表同期（従来通り独立管理） |
+
+TV版はWebアセットを監査済みバージョンに固定している。最新Jellyfinと差がある場合もあるため、`config/` をバックアップし、互換性を確認してから適用すること。TV用外部ネットワークの名称は `.env` の `CECH_MEDIA_NETWORK` で設定する。
+
+```bash
+./manage-tv.sh enable
+./manage-tv.sh status
+./manage-tv.sh disable
+./manage-tv.sh --help
+```
+
+`enable` / `disable` はJellyfinコンテナを再作成するため視聴・音楽再生が中断する。TV版稼働中に通常の `docker compose up -d` を実行するとTV版の構成が外れてしまう場合がある。TV版のまま更新するときは追加ファイルを指定すること。
+
+詳細: [tv/README.md](tv/README.md)
+
+## HTTPS連携（任意・HTTPとは独立）
+
+この機能はJellyfin本体への上書きではない。**別ComposeプロジェクトのNginx gateway**として、既存のTailscale証明書を読み取り専用で使い、KonomiTV用7443とJellyfin用8443を公開する。
+
+`.env` で設定する必須値は `CECH_TLS_CERT_GID`、`CECH_TLS_SERVER_NAME`、`CECH_TLS_BIND`、`CECH_TLS_KONOMI_UPSTREAM`、`CECH_JELLYFIN_NETWORK`。特に `CECH_JELLYFIN_NETWORK` は両バックエンドにアクセス可能な既存Dockerネットワークを指定する。ポート、証明書ディレクトリ、Jellyfin接続先も `.env` から変更可能じゃ。
+
+```bash
+./manage-https.sh check
+./manage-https.sh enable
+./manage-https.sh status
+./manage-https.sh disable
+./manage-https.sh --help
+```
+
+HTTPSを有効にしてもHTTPポート8096のJellyfin本体は変更されない。既存HTTPS gatewayがある場合は7443/8443の競合に注意してくれ。ネットワークに両バックエンドが接続されていない場合、設定が成功してもHTTP中継は失敗するので、その構成を先に確認するのじゃ。
+
+詳細: [tv/HTTPS.md](tv/HTTPS.md)
+
 ## 安全上の注意
 
-`.env` は `.gitignore` に含まれており、認証情報をGitHubへコミットしない構成じゃ。既存の `config/`、`cache/` とTV連携ディレクトリは変更しない。
+`.env` は `.gitignore` に含まれており、認証情報をGitHubへコミットしない構成じゃ。既存の `config/`、`cache/` とTV連携コードは削除しない。固定版JellyfinのTV修正を適用する前に互換性とバックアップを確認すること。
