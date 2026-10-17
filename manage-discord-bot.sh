@@ -74,7 +74,12 @@ case "$1" in
             exit 1
         fi
         compose config --quiet
-        compose up -d jellyfin-discord-bot
+        if ! docker inspect jellyfin >/dev/null 2>&1; then
+            printf '先にJellyfin本体を起動してください。\n' >&2
+            exit 1
+        fi
+        # 依存先Jellyfinを再作成せず、既存のTV版・HTTPS設定を保持する。
+        compose up -d --no-deps jellyfin-discord-bot
         ;;
     disable|off)
         compose stop jellyfin-discord-bot

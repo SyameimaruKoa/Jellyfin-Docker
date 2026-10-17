@@ -54,12 +54,25 @@ fi
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
+https_port_active() {
+    # 現在公開している8920の設定は、TV版との切り替え後も維持する。
+    docker port jellyfin 8920/tcp >/dev/null 2>&1
+}
+
 compose_base() {
-    docker compose --project-directory "$SCRIPT_DIR" -f "$SCRIPT_DIR/docker-compose.yml" "$@"
+    local files=(-f "$SCRIPT_DIR/docker-compose.yml")
+    if https_port_active; then
+        files+=(-f "$SCRIPT_DIR/docker-compose.https.yml")
+    fi
+    docker compose --project-directory "$SCRIPT_DIR" "${files[@]}" "$@"
 }
 
 compose_tv() {
-    docker compose --project-directory "$SCRIPT_DIR" -f "$SCRIPT_DIR/docker-compose.yml" -f "$SCRIPT_DIR/docker-compose.tv.yml" "$@"
+    local files=(-f "$SCRIPT_DIR/docker-compose.yml" -f "$SCRIPT_DIR/docker-compose.tv.yml")
+    if https_port_active; then
+        files+=(-f "$SCRIPT_DIR/docker-compose.https.yml")
+    fi
+    docker compose --project-directory "$SCRIPT_DIR" "${files[@]}" "$@"
 }
 
 case "$1" in

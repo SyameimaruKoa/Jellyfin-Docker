@@ -2,7 +2,7 @@
 
 既存HTTPアプリの前段に独立Nginxコンテナを追加します。KonomiTVはHTTPS7443、JellyfinはHTTPS8443です。HTTP7000/8096はそのまま利用できます。証明書の取得・更新自体は [Tailscale-certificates](https://github.com/SyameimaruKoa/Tailscale-certificates) に任せ、管理対象の `/etc/tailscale-certs` 親全体を読み取り専用でマウントします。
 
-新しいroot構成では `.env` に設定し、`./manage-https.sh check` で検査してから `./manage-https.sh enable` で独立起動します（停止は `disable`）。HTTP本体やテレビ向けWeb修正に対するCompose上書きは行いません。既存の `tv/docker-compose.https.yml` と `tv/private/https.env` による従来の独立運用も維持します。
+テレビ連携用のゲートウェイは、rootの `.env` を設定し、`./manage-tv-https.sh check` で検査してから `./manage-tv-https.sh enable` で独立起動します（停止は `disable`）。HTTP本体やテレビ向けWeb修正への上書きは行いません。従来の `tv/docker-compose.https.yml` と `tv/private/https.env` の運用も維持します。ルートの `docker-compose.https.yml` はJellyfin標準HTTPS（8920）の任意設定であり、別機能です。
 
 以下は従来の `tv/private/https.env` 方式の設定例です。
 
@@ -15,7 +15,7 @@ CECH_TLS_BIND=ホストのTailscale IPv4
 CECH_JELLYFIN_NETWORK=既存アプリ共通のDockerネットワーク名
 ```
 
-rootの `.env` 方式でも元の公開ポート（KonomiTV 7443 / Jellyfin 8443）は固定値として維持します。内部の転送先は `konomitv:7000` と `jellyfin:8096`、証明書の配置は `/etc/tailscale-certs` です。`.env` にはPC固有の証明書ホスト名・証明書グループID・Tailscale IPv4・共有Dockerネットワークだけを指定します。`tv/docker-compose.https.yml` の従来構成は変更していません。KonomiTV自体は別リポジトリのサービスです。`CECH_JELLYFIN_NETWORK` は両HTTP転送先へ到達できる既存ネットワークを指定してください。
+テレビ連携の公開ポートはKonomiTV 7443 / Jellyfin 8443のままで、内部の転送先は `konomitv:7000` と `jellyfin:8096` です。証明書は従来どおり `/etc/tailscale-certs` を利用します。`.env` には証明書ホスト名・証明書グループID・Tailscale IPv4・共有Dockerネットワークを指定します。`tv/docker-compose.https.yml` の従来構成は一切変更していません。KonomiTV自体は別リポジトリのサービスです。`CECH_JELLYFIN_NETWORK` は両HTTP転送先へ到達できる既存ネットワークを指定してください。
 
 必要に応じ `CECH_TLS_CERT_DIR` とdigestで固定した `CECH_TLS_IMAGE` を指定できます。起動: `docker compose --project-directory . -p tv-https --env-file tv/private/https.env -f tv/docker-compose.https.yml up -d`。停止:同じComposeで `stop`。既存アプリや証明書サービスの設定変更は不要です。
 
